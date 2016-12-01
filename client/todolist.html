@@ -6,25 +6,67 @@
 		<link rel="stylesheet" type="text/css" href="bootstrap-3.3.7-dist/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="css/custom.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.0-rc.2/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.0-rc.2/angular-resource.min.js"></script>
+		<script src="/js/lb-services.js"></script>
 		<script type="text/javascript">
-			var myApp = angular.module('totoApp',[]);
-			myApp.controller('TodoController',
-				['$scpe', function($scope) {
+			// lbServices è un modulo devinito nel file js/lb-services.js
+			var app = angular.module('todoApp',['lbServices']);
 
-					$scope.insert = function() {
+			app.controller('appTodoController',
+				['$scope', 'Todo', function($scope,Todo) {
 
-					};
+						$scope.newTodo = {
+							name:"",
+							descrizione:"",
+							important:false
+						};
 
-					};
-				]
-			);
+						$scope.aggiungiTodo = function() {
+							console.log($scope.newTodo);
+						};
+
+						$scope.doneTodo = function(idtodo) {
+							console.log($scope.newTodo.name+ " fatto!");
+						}
+
+						$scope.deleteTodo = function(idtodo) {
+							console.log($scope.newTodo.name + " cancellato!");
+						}
+
+						$scope.todos = [];
+						$scope.todosdone = [];
+
+						function getTodos(){
+							Todo
+								.find()
+								.$promise
+								.then(function(results){
+									for(i=0;i<results.length;i++){
+										if(results[i].done===false){
+											$scope.todos.push(results[i])
+										} else {
+											$scope.todosdone.push(results[i])
+										}
+									}
+									console.log(results);
+								});
+							}
+						
+						getTodos();		
+					}
+
+
+				]);
 		</script>
 	</head>
 
-<body>
-<div class="container">
+<body ng-app="todoApp">
+
+<div class="container" ng-controller="appTodoController">
+
 	<h2>NodeJS-Loopback TODO system</h2>
 	<h3>by Marco Foi</h3>
+
 	<div class="row">
 
 		<div class="col-lg-6">
@@ -36,23 +78,35 @@
 						<form>
 							<div class="form-group">
 								<label for="name" >Nome:</label>
-								<input type="text" name="nome" id="name" class="form-control">
+								<input ng-model="newTodo.name" type="text" name="nome" id="name" class="form-control">
 							</div>
 							<div class="form-group">
-								<label for="descrizione" >Descrizione:</label>
-								<input type="text" name="descrizione" id="descrizione" class="form-control">
+								<label for="description">Description:</label>
+								<input ng-model="newTodo.description" type="text" name="description" id="description" class="form-control">
 							</div>
 							<div class="form-group">
-								<label for="radiotf" >Importante:</label>
+								<label for="radiotf">Importante:</label>
 								<div name="radiotf">
-									<div class="radio" >
-										<label><input type="radio" name="important" id="descrizione" value="true" checked>Vero:</label>
-										<label><input type="radio" name="important" id="descrizione" value="false">Falso:</label>
+									<div class="radio">
+										<label><input ng-model="newTodo.important" type="radio" name="important" id="important1" value="true" checked>Vero:</label>
+										<label><input ng-model="newTodo.important" type="radio" name="important" id="important2" value="false">Falso:</label>
 									</div>
 								</div>
 							</div>
 							<div class="form-group">
-								<button type="button" class="btn btn-primary">Invia</button>
+								<button ng-click="aggiungiTodo()" type="button" class="btn btn-primary">Invia</button>
+							</div>
+							<div class="well">
+							<p>Real time data</p>
+							<div class="form-group">
+								<button type="button" class="btn btn-primary">{{newTodo.name}}</button>
+							</div>
+							<div class="form-group">
+								<button type="button" class="btn btn-primary">{{newTodo.description}}</button>
+							</div>
+							<div class="form-group">
+								<button type="button" class="btn btn-primary">{{newTodo.important}}</button>
+							</div>
 							</div>
 						</form>
 						</div>
@@ -82,13 +136,13 @@
 											<th>Importante</th>
 											<th>Operazioni</th>
 										</tr>
-										<tr>
-											<td>a</td>
-											<td>a1</td>
-											<td>a1</td>
+										<tr ng-repeat="item in todos">
+											<td>{{item.name}}</td>
+											<td>{{item.description}}</td>
+											<td>{{item.important}}</td>
 											<td>
-												<button type="button" class="btn btn-success btn-xs">Fatto</button>
-												<button type="button" class="btn btn-danger btn-xs">Elimina</button>
+												<button ng-click="doneTodo({{item.id}})" type="button" class="btn btn-success btn-xs">Fatto</button>
+												<button ng-click="deleteTodo({{item.id}})" type="button" class="btn btn-danger btn-xs">Elimina</button>
 											</td>
 										</tr>								
 									</table>
@@ -113,6 +167,5 @@
 </div>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript" src="bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.0-rc.2/angular.min.js"></script>
 </body>
 </html>
